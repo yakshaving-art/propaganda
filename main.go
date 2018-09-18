@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/onrik/logrus/filename"
@@ -21,22 +22,20 @@ func main() {
 }
 
 func handleGithub(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		logrus.Debugf("failed to parse form on request %s: %#v", r, err)
+	// This requires registering the webhooks using json format and only receive
+	// pull request events
+
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		logrus.Errorf("failed to read body: %s", err)
 		http.Error(w, fmt.Sprintf("bad request: %s", err), http.StatusBadRequest)
 		return
 	}
-
-	payload := r.FormValue("payload")
-	if payload == "" {
-		logrus.Debugf("no payload in form %#v", r.Form)
-		http.Error(w, "no payload in form", http.StatusBadRequest)
-		return
-	}
+	defer r.Body.Close()
 
 	w.WriteHeader(http.StatusAccepted)
 
-	logrus.Println("received Webhook payload: %s", payload)
+	logrus.Infof("received Webhook payload: %s", string(body))
 }
 
 func setupLogger() {
