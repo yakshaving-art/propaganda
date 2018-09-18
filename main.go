@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
 
@@ -11,28 +12,31 @@ import (
 func main() {
 	setupLogger()
 
+	args := parseArgs()
+
 	http.HandleFunc("/github", handleGithub)
 
-	logrus.Fatal(http.ListenAndServe(":9999", nil))
+	logrus.Infof("listening on %s", args.Address)
+	logrus.Fatal(http.ListenAndServe(args.Address, nil))
 }
 
 func handleGithub(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
-		logrus.Debugf("Failed to parse form on request %s: %#v", r, err)
+		logrus.Debugf("failed to parse form on request %s: %#v", r, err)
 		http.Error(w, fmt.Sprintf("bad request: %s", err), http.StatusBadRequest)
 		return
 	}
 
 	payload := r.FormValue("payload")
 	if payload == "" {
-		logrus.Debugf("No payload in form %#v", r.Form)
+		logrus.Debugf("no payload in form %#v", r.Form)
 		http.Error(w, "no payload in form", http.StatusBadRequest)
 		return
 	}
 
 	w.WriteHeader(http.StatusAccepted)
 
-	logrus.Println("Received Webhook payload: %s", payload)
+	logrus.Println("received Webhook payload: %s", payload)
 }
 
 func setupLogger() {
@@ -41,4 +45,18 @@ func setupLogger() {
 		FullTimestamp: true,
 	})
 	logrus.SetLevel(logrus.DebugLevel)
+}
+
+// Args represents the commandline arguments
+type Args struct {
+	Address string
+}
+
+func parseArgs() Args {
+	var args Args
+
+	flag.StringVar(&args.Address, "address", ":9092", "listening address")
+	flag.Parse()
+
+	return args
 }
