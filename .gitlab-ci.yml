@@ -7,12 +7,12 @@ before_script:
   - mkdir -p /go/src/gitlab.com/yakshaving.art
   - cp -r /builds/yakshaving.art/propaganda /go/src/gitlab.com/yakshaving.art/
   - cd /go/src/gitlab.com/yakshaving.art/propaganda
-  - dep ensure
+  - make ensure
 
 build:
   stage: build
   script:
-    - go build
+    - make build
     
 # test:
 #   stage: test
