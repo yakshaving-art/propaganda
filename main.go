@@ -15,13 +15,13 @@ func main() {
 
 	args := parseArgs()
 
-	http.HandleFunc("/github", handleGithub)
+	http.HandleFunc("/", handle)
 
 	logrus.Infof("listening on %s", args.Address)
 	logrus.Fatal(http.ListenAndServe(args.Address, nil))
 }
 
-func handleGithub(w http.ResponseWriter, r *http.Request) {
+func handle(w http.ResponseWriter, r *http.Request) {
 	// This requires registering the webhooks using json format and only receive
 	// pull request events
 
@@ -35,7 +35,7 @@ func handleGithub(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusAccepted)
 
-	logrus.Infof("received Webhook payload: %s", string(body))
+	logrus.Infof("received Webhook\nHeaders: %#v\nPayload: %s", r.Header, string(body))
 }
 
 func setupLogger() {
