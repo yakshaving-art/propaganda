@@ -1,0 +1,142 @@
+{
+    "object_kind": "merge_request",
+    "event_type": "merge_request",
+    "user": {
+        "name": "Pablo",
+        "username": "pablo",
+        "avatar_url": "https://secure.gravatar.com/avatar/e6d8f2e6b69c304b40b779197ed1e228?s=80\u0026d=identicon"
+    },
+    "project": {
+        "id": 13,
+        "name": "testing-webhooks",
+        "description": "",
+        "web_url": "https://git.yakshaving.art/pablo/testing-webhooks",
+        "avatar_url": null,
+        "git_ssh_url": "git@git.yakshaving.art:pablo/testing-webhooks.git",
+        "git_http_url": "https://git.yakshaving.art/pablo/testing-webhooks.git",
+        "namespace": "pablo",
+        "visibility_level": 0,
+        "path_with_namespace": "pablo/testing-webhooks",
+        "default_branch": "master",
+        "ci_config_path": null,
+        "homepage": "https://git.yakshaving.art/pablo/testing-webhooks",
+        "url": "git@git.yakshaving.art:pablo/testing-webhooks.git",
+        "ssh_url": "git@git.yakshaving.art:pablo/testing-webhooks.git",
+        "http_url": "https://git.yakshaving.art/pablo/testing-webhooks.git"
+    },
+    "object_attributes": {
+        "assignee_id": 2,
+        "author_id": 2,
+        "created_at": "2018-09-19 20:41:55 UTC",
+        "description": "Something in the description",
+        "head_pipeline_id": null,
+        "id": 10,
+        "iid": 1,
+        "last_edited_at": null,
+        "last_edited_by_id": null,
+        "merge_commit_sha": "d79c74f5bbe6767bd90675c046a38a35c76c797b",
+        "merge_error": null,
+        "merge_params": {
+            "force_remove_source_branch": "1"
+        },
+        "merge_status": "can_be_merged",
+        "merge_user_id": null,
+        "merge_when_pipeline_succeeds": false,
+        "milestone_id": null,
+        "source_branch": "pc/make-some-change",
+        "source_project_id": 13,
+        "state": "merged",
+        "target_branch": "master",
+        "target_project_id": 13,
+        "time_estimate": 0,
+        "title": "[announce] Update README.md",
+        "updated_at": "2018-09-19 20:44:20 UTC",
+        "updated_by_id": null,
+        "url": "https://git.yakshaving.art/pablo/testing-webhooks/merge_requests/1",
+        "source": {
+            "id": 13,
+            "name": "testing-webhooks",
+            "description": "",
+            "web_url": "https://git.yakshaving.art/pablo/testing-webhooks",
+            "avatar_url": null,
+            "git_ssh_url": "git@git.yakshaving.art:pablo/testing-webhooks.git",
+            "git_http_url": "https://git.yakshaving.art/pablo/testing-webhooks.git",
+            "namespace": "pablo",
+            "visibility_level": 0,
+            "path_with_namespace": "pablo/testing-webhooks",
+            "default_branch": "master",
+            "ci_config_path": null,
+            "homepage": "https://git.yakshaving.art/pablo/testing-webhooks",
+            "url": "git@git.yakshaving.art:pablo/testing-webhooks.git",
+            "ssh_url": "git@git.yakshaving.art:pablo/testing-webhooks.git",
+            "http_url": "https://git.yakshaving.art/pablo/testing-webhooks.git"
+        },
+        "target": {
+            "id": 13,
+            "name": "testing-webhooks",
+            "description": "",
+            "web_url": "https://git.yakshaving.art/pablo/testing-webhooks",
+            "avatar_url": null,
+            "git_ssh_url": "git@git.yakshaving.art:pablo/testing-webhooks.git",
+            "git_http_url": "https://git.yakshaving.art/pablo/testing-webhooks.git",
+            "namespace": "pablo",
+            "visibility_level": 0,
+            "path_with_namespace": "pablo/testing-webhooks",
+            "default_branch": "master",
+            "ci_config_path": null,
+            "homepage": "https://git.yakshaving.art/pablo/testing-webhooks",
+            "url": "git@git.yakshaving.art:pablo/testing-webhooks.git",
+            "ssh_url": "git@git.yakshaving.art:pablo/testing-webhooks.git",
+            "http_url": "https://git.yakshaving.art/pablo/testing-webhooks.git"
+        },
+        "last_commit": {
+            "id": "71f78e380e875c2d210b522b18761d73d8ecb867",
+            "message": "Update README.md",
+            "timestamp": "2018-09-19T20:41:11Z",
+            "url": "https://git.yakshaving.art/pablo/testing-webhooks/commit/71f78e380e875c2d210b522b18761d73d8ecb867",
+            "author": {
+                "name": "Pablo",
+                "email": "pablo@gmail.com"
+            }
+        },
+        "work_in_progress": false,
+        "total_time_spent": 0,
+        "human_total_time_spent": null,
+        "human_time_estimate": null,
+        "action": "merge"
+    },
+    "labels": [],
+    "changes": {
+        "state": {
+            "previous": "locked",
+            "current": "merged"
+        },
+        "updated_at": {
+            "previous": "2018-09-19 20:44:19 UTC",
+            "current": "2018-09-19 20:44:20 UTC"
+        },
+        "assignee": {
+            "previous": null,
+            "current": {
+                "name": "Pablo",
+                "username": "pablo",
+                "avatar_url": "https://secure.gravatar.com/avatar/e6d8f2e6b69c304b40b779197ed1e228?s=80\u0026d=identicon"
+            }
+        },
+        "total_time_spent": {
+            "previous": null,
+            "current": 0
+        }
+    },
+    "repository": {
+        "name": "testing-webhooks",
+        "url": "git@git.yakshaving.art:pablo/testing-webhooks.git",
+        "description": "",
+        "homepage": "https://git.yakshaving.art/pablo/testing-webhooks"
+    },
+    "assignee": {
+        "name": "Pablo",
+        "username": "pablo",
+        "avatar_url": "https://secure.gravatar.com/avatar/e6d8f2e6b69c304b40b779197ed1e228?s=80\u0026d=identicon"
+    }
+}

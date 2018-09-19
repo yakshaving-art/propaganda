@@ -1,0 +1,60 @@
+{
+    "object_kind": "push",
+    "event_name": "push",
+    "before": "9fab275d48b8f2f6507aec8f91df01d6e9e4a66e",
+    "after": "9fab275d48b8f2f6507aec8f91df01d6e9e4a66e",
+    "ref": "refs/heads/master",
+    "checkout_sha": "9fab275d48b8f2f6507aec8f91df01d6e9e4a66e",
+    "message": null,
+    "user_id": 2,
+    "user_name": "Pablo",
+    "user_username": "pablo",
+    "user_email": "pablo@gmail.com",
+    "user_avatar": "https://secure.gravatar.com/avatar/e6d8f2e6b69c304b40b779197ed1e228?s=80\u0026d=identicon",
+    "project_id": 13,
+    "project": {
+        "id": 13,
+        "name": "testing-webhooks",
+        "description": "",
+        "web_url": "https://git.yakshaving.art/pablo/testing-webhooks",
+        "avatar_url": null,
+        "git_ssh_url": "git@git.yakshaving.art:pablo/testing-webhooks.git",
+        "git_http_url": "https://git.yakshaving.art/pablo/testing-webhooks.git",
+        "namespace": "pablo",
+        "visibility_level": 0,
+        "path_with_namespace": "pablo/testing-webhooks",
+        "default_branch": "master",
+        "ci_config_path": null,
+        "homepage": "https://git.yakshaving.art/pablo/testing-webhooks",
+        "url": "git@git.yakshaving.art:pablo/testing-webhooks.git",
+        "ssh_url": "git@git.yakshaving.art:pablo/testing-webhooks.git",
+        "http_url": "https://git.yakshaving.art/pablo/testing-webhooks.git"
+    },
+    "commits": [
+        {
+            "id": "9fab275d48b8f2f6507aec8f91df01d6e9e4a66e",
+            "message": "Add README.md",
+            "timestamp": "2018-09-19T20:35:52Z",
+            "url": "https://git.yakshaving.art/pablo/testing-webhooks/commit/9fab275d48b8f2f6507aec8f91df01d6e9e4a66e",
+            "author": {
+                "name": "Pablo",
+                "email": "pcarranza@gmail.com"
+            },
+            "added": [
+                "README.md"
+            ],
+            "modified": [],
+            "removed": []
+        }
+    ],
+    "total_commits_count": 1,
+    "repository": {
+        "name": "testing-webhooks",
+        "url": "git@git.yakshaving.art:pablo/testing-webhooks.git",
+        "description": "",
+        "homepage": "https://git.yakshaving.art/pablo/testing-webhooks",
+        "git_http_url": "https://git.yakshaving.art/pablo/testing-webhooks.git",
+        "git_ssh_url": "git@git.yakshaving.art:pablo/testing-webhooks.git",
+        "visibility_level": 0
+    }
+}
