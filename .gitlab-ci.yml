@@ -1,5 +1,6 @@
 image: golang:1.10
 stages:
+  - test
   - build
 
 before_script:
@@ -7,15 +8,15 @@ before_script:
   - mkdir -p /go/src/gitlab.com/yakshaving.art
   - cp -r /builds/yakshaving.art/propaganda /go/src/gitlab.com/yakshaving.art/
   - cd /go/src/gitlab.com/yakshaving.art/propaganda
-  - make ensure
+
+test:
+  stage: test
+  coverage: '/^total:\s+\(statements\)\s+(\d+.\d+)%$/'
+  script:
+  - make test
 
 build:
   stage: build
   script:
-    - make build
+  - make build
     
-# test:
-#   stage: test
-#   coverage: '/^total:\s+\(statements\)\s+(\d+.\d+)%$/'
-#   script:
-#     - go test -v -coverprofile=coverage.out $(go list ./... | grep -v '/vendor/') && go tool cover -func=coverage.out
