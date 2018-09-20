@@ -1,5 +1,15 @@
 package webhook
 
+// Headers
+// "X-Hub-Signature":[]string{"sha1=be490c94029284a1074f6ed7d6f551affcfa6e8b"},
+// "User-Agent":[]string{"GitHub-Hookshot/32d792e"},
+// "Content-Length":[]string{"20774"},
+// "X-Github-Delivery":[]string{"97757e90-bb8e-11e8-8017-464837e8ed07"},
+// "X-Github-Event":[]string{"pull_request"},
+// "Accept-Encoding":[]string{"gzip"},
+// "Accept":[]string{"*/*"},
+// "Content-Type":[]string{"application/json"}
+
 // // Repository holds the repository information
 // type Repository struct {
 // 	URL      string `json:"url"`

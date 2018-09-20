@@ -1,8 +1,11 @@
 
-all: ensure build
+all: ensure test build
 
 ensure:
 	dep ensure
 
-build:
+test: ensure
+	go test -v -coverprofile=coverage.out $$(go list ./... | grep -v '/vendor/') && go tool cover -func=coverage.out
+
+build: ensure
 	go build
