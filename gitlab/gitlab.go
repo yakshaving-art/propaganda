@@ -11,26 +11,32 @@ package gitlab
 // "Content-Type":[]string{"application/json"},
 
 import (
-	"encoding/json"
 	"fmt"
+	"strings"
+
+	"encoding/json"
 
 	"gitlab.com/yakshaving.art/propaganda/core"
 )
 
 // Parser implements the core.Parser type for GitLab merge webhooks
 type Parser struct {
+	MatchString string
 }
 
 // Match indicates that the headers match with the kind of request
 func (Parser) Match(headers map[string][]string) bool {
-	if _, ok := headers["X-Gitlab-Event"]; ok {
-		return true
+	if event, ok := headers["X-Gitlab-Event"]; ok {
+		if len(event) != 1 {
+			return false
+		}
+		return event[0] == "Merge Request Hook"
 	}
 	return false
 }
 
 // Parse creates a new merge request object from the passed payload
-func (Parser) Parse(payload []byte) (core.Announcement, error) {
+func (p Parser) Parse(payload []byte) (core.Announcement, error) {
 	var mr MergeRequest
 	if err := json.Unmarshal(payload, &mr); err != nil {
 		return mr, fmt.Errorf("could not parse json payload: %s", err)
@@ -38,6 +44,10 @@ func (Parser) Parse(payload []byte) (core.Announcement, error) {
 	if mr.Kind != "merge_request" {
 		return MergeRequest{}, fmt.Errorf("json payload is not a merge request but a %s", mr.Kind)
 	}
+	if !strings.HasPrefix(mr.Attributes.Title, p.MatchString) {
+		return MergeRequest{}, fmt.Errorf("MR title '%s' is not annouceable", mr.Attributes.Title)
+	}
+	mr.Attributes.Title = strings.TrimSpace(mr.Attributes.Title[len(p.MatchString):])
 	return mr, nil
 }
 
@@ -48,19 +58,12 @@ type MergeRequest struct {
 	Attributes Attributes `json:"object_attributes"`
 }
 
-// Title implements Annoucement
-func (m MergeRequest) Title() string {
-	return m.Attributes.Title
-}
-
 // Text implements Annoucement
 func (m MergeRequest) Text() string {
-	return ""
-}
-
-// URL implements Annoucement
-func (m MergeRequest) URL() string {
-	return m.Attributes.URL
+	return fmt.Sprintf("*%s*\n\n%s\n\n*URL:* %s",
+		m.Attributes.Title,
+		m.Attributes.Description,
+		m.Attributes.URL)
 }
 
 // ShouldAnnounce implements Announcement

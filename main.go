@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"os"
 
 	"gitlab.com/yakshaving.art/propaganda/core"
 	"gitlab.com/yakshaving.art/propaganda/gitlab"
@@ -21,9 +22,13 @@ func main() {
 	metrics.Register(args.MetricsPath)
 
 	s := server.New(
-		slack.Announcer{},
+		slack.Announcer{
+			WebhookURL: args.WebhookURL,
+		},
 		[]core.Parser{
-			gitlab.Parser{},
+			gitlab.Parser{
+				MatchString: "[announce]",
+			},
 		})
 
 	logrus.Fatal(s.ListenAndServe(args.Address))
@@ -41,6 +46,8 @@ func setupLogger() {
 type Args struct {
 	Address     string
 	MetricsPath string
+
+	WebhookURL string
 }
 
 func parseArgs() Args {
@@ -48,7 +55,12 @@ func parseArgs() Args {
 
 	flag.StringVar(&args.Address, "address", ":9092", "listening address")
 	flag.StringVar(&args.MetricsPath, "metrics", "/metrics", "metrics path")
+	flag.StringVar(&args.WebhookURL, "webhook-url", os.Getenv("SLACK_WEBHOOK_URL"), "slack webhook url")
 	flag.Parse()
+
+	if args.WebhookURL == "" {
+		logrus.Fatalf("No slack webhook url, define it through -webhook-url argument or SLACK_WEBHOOK_URL env var")
+	}
 
 	return args
 }

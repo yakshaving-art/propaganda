@@ -2,9 +2,7 @@ package core
 
 // Announcement represents a message to be shouted out
 type Announcement interface {
-	Title() string
 	Text() string
-	URL() string
 	ShouldAnnounce() bool
 	ProjectName() string
 }

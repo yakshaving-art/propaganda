@@ -9,7 +9,9 @@ import (
 )
 
 func TestParsingPayloads(t *testing.T) {
-	parser := gitlab.Parser{}
+	parser := gitlab.Parser{
+		MatchString: "[announce]",
+	}
 	tt := []struct {
 		name           string
 		jsonFilename   string
@@ -26,7 +28,7 @@ func TestParsingPayloads(t *testing.T) {
 				},
 				Attributes: gitlab.Attributes{
 					State:       "opened",
-					Title:       "[announce] Update README.md",
+					Title:       "Update README.md",
 					Description: "Something in the description",
 					URL:         "https://git.yakshaving.art/pablo/testing-webhooks/merge_requests/1",
 					Action:      "open",
@@ -44,7 +46,7 @@ func TestParsingPayloads(t *testing.T) {
 				},
 				Attributes: gitlab.Attributes{
 					State:       "merged",
-					Title:       "[announce] Update README.md",
+					Title:       "Update README.md",
 					Description: "Something in the description",
 					URL:         "https://git.yakshaving.art/pablo/testing-webhooks/merge_requests/1",
 					Action:      "merge",
@@ -84,9 +86,7 @@ func TestParsingPayloads(t *testing.T) {
 
 			a.EqualValuesf(tc.expected, mr, "parsed merge request is not as expected")
 
-			a.Equal(tc.expected.Title(), mr.Title())
 			a.Equal(tc.expected.Text(), mr.Text())
-			a.Equal(tc.expected.URL(), mr.URL())
 			a.Equal(tc.expected.ProjectName(), mr.ProjectName())
 			a.Equal(tc.shouldAnnounce, mr.ShouldAnnounce())
 		})

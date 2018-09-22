@@ -51,18 +51,18 @@ var (
 		Name:      "valid_total",
 		Help:      "total number of valid webhooks",
 	}, []string{"project"})
-	AnnouncementSuccesses = prometheus.NewCounter(prometheus.CounterOpts{
+	AnnouncementSuccesses = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: namespace,
 		Subsystem: "announcer",
 		Name:      "success_total",
 		Help:      "total number of announcement successes",
-	})
-	AnnouncementErrors = prometheus.NewCounter(prometheus.CounterOpts{
+	}, []string{"project"})
+	AnnouncementErrors = prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: namespace,
 		Subsystem: "announcer",
 		Name:      "errors_total",
 		Help:      "total number of announcement errors",
-	})
+	}, []string{"status"})
 )
 
 // Register registers all the metrics and sets the http handler
@@ -71,6 +71,14 @@ func Register(metricsPath string) {
 	Up.Set(0)
 
 	prometheus.MustRegister(bootTime)
+	prometheus.MustRegister(Up)
+	prometheus.MustRegister(WebhooksReceived)
+	prometheus.MustRegister(WebhooksBytesRead)
+	prometheus.MustRegister(WebhooksErrors)
+	prometheus.MustRegister(WebhooksInvalid)
+	prometheus.MustRegister(WebhooksValid)
+	prometheus.MustRegister(AnnouncementSuccesses)
+	prometheus.MustRegister(AnnouncementErrors)
 
 	http.Handle(metricsPath, prometheus.Handler())
 }

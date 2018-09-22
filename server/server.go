@@ -68,18 +68,15 @@ func (s Server) handle(w http.ResponseWriter, r *http.Request) {
 
 			metrics.WebhooksValid.WithLabelValues(a.ProjectName()).Inc()
 
+			logrus.Debugf("announcing webhook %#v", a)
 			s.announcer.Announce(a)
 
 			w.WriteHeader(http.StatusAccepted)
-			logrus.Debugf("received Webhook\nHeaders: %#v\nPayload: %s", r.Header, string(body))
+			// logrus.Debugf("received Webhook\nHeaders: %#v\nPayload: %s", r.Header, string(body))
 			return
 		}
 	}
 
 	metrics.WebhooksInvalid.WithLabelValues("no_parser").Inc()
 	http.Error(w, fmt.Sprintf("No parser defined for this hook"), http.StatusUnprocessableEntity)
-}
-
-func (s Server) process(a core.Announcement) {
-
 }
