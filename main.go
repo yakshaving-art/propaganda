@@ -2,9 +2,12 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"io/ioutil"
-	"net/http"
+
+	"gitlab.com/yakshaving.art/propaganda/core"
+	"gitlab.com/yakshaving.art/propaganda/gitlab"
+	"gitlab.com/yakshaving.art/propaganda/metrics"
+	"gitlab.com/yakshaving.art/propaganda/server"
+	"gitlab.com/yakshaving.art/propaganda/slack"
 
 	"github.com/onrik/logrus/filename"
 	"github.com/sirupsen/logrus"
@@ -15,27 +18,15 @@ func main() {
 
 	args := parseArgs()
 
-	http.HandleFunc("/", handle)
+	metrics.Register(args.MetricsPath)
 
-	logrus.Infof("listening on %s", args.Address)
-	logrus.Fatal(http.ListenAndServe(args.Address, nil))
-}
+	s := server.New(
+		slack.Announcer{},
+		[]core.Parser{
+			gitlab.Parser{},
+		})
 
-func handle(w http.ResponseWriter, r *http.Request) {
-	// This requires registering the webhooks using json format and only receive
-	// pull request events
-
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		logrus.Errorf("failed to read body: %s", err)
-		http.Error(w, fmt.Sprintf("bad request: %s", err), http.StatusBadRequest)
-		return
-	}
-	defer r.Body.Close()
-
-	w.WriteHeader(http.StatusAccepted)
-
-	logrus.Infof("received Webhook\nHeaders: %#v\nPayload: %s", r.Header, string(body))
+	logrus.Fatal(s.ListenAndServe(args.Address))
 }
 
 func setupLogger() {
@@ -48,13 +39,15 @@ func setupLogger() {
 
 // Args represents the commandline arguments
 type Args struct {
-	Address string
+	Address     string
+	MetricsPath string
 }
 
 func parseArgs() Args {
 	var args Args
 
 	flag.StringVar(&args.Address, "address", ":9092", "listening address")
+	flag.StringVar(&args.MetricsPath, "metrics", "/metrics", "metrics path")
 	flag.Parse()
 
 	return args
