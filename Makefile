@@ -9,3 +9,9 @@ test: ensure
 
 build: ensure
 	go build
+
+snapshot:
+	goreleaser --rm-dist --snapshot
+
+release: ensure
+	goreleaser --rm-dist
