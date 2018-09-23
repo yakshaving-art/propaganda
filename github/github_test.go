@@ -88,15 +88,13 @@ func TestParsingPayloads(t *testing.T) {
 	}
 }
 
-// func TestInvalidPayloadErrs(t *testing.T) {
-// 	a := assert.New(t)
+func TestHeadersMatcher(t *testing.T) {
+	a := assert.New(t)
+	p := github.NewParser(".*")
 
-// 	b, err := ioutil.ReadFile("fixtures/gitlab-push-event.json")
-// 	a.Nil(err, "could not read fixture file")
-// 	a.NotNilf(b, "content should not be nil")
-
-// 	parser := gitlab.Parser{}
-// 	mr, err := parser.Parse(b)
-// 	a.Errorf(err, "json payload is not a merge request but a push")
-// 	a.Equalf(gitlab.MergeRequest{}, mr, "merge request should be empty")
-// }
+	a.Equal(false, p.MatchHeaders(map[string][]string{}))
+	a.Equal(false, p.MatchHeaders(map[string][]string{"X-Gitlab-Event": {"pull_request"}}))
+	a.Equal(false, p.MatchHeaders(map[string][]string{"X-Gitlab-Event": {"Merge Request Hook"}}))
+	a.Equal(false, p.MatchHeaders(map[string][]string{"X-Github-Event": {"Merge Request Hook"}}))
+	a.Equal(true, p.MatchHeaders(map[string][]string{"X-Github-Event": {"pull_request"}}))
+}

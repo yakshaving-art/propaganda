@@ -103,3 +103,14 @@ func TestInvalidPayloadErrs(t *testing.T) {
 	a.Errorf(err, "json payload is not a merge request but a push")
 	a.Equalf(gitlab.MergeRequest{}, mr, "merge request should be empty")
 }
+
+func TestHeadersMatcher(t *testing.T) {
+	a := assert.New(t)
+	p := gitlab.NewParser(".*")
+
+	a.Equal(false, p.MatchHeaders(map[string][]string{}))
+	a.Equal(false, p.MatchHeaders(map[string][]string{"X-Github-Event": {"Merge Request Hook"}}))
+	a.Equal(false, p.MatchHeaders(map[string][]string{"X-Github-Event": {"pull_request"}}))
+	a.Equal(false, p.MatchHeaders(map[string][]string{"X-Gitlab-Event": {"pull_request"}}))
+	a.Equal(true, p.MatchHeaders(map[string][]string{"X-Gitlab-Event": {"Merge Request Hook"}}))
+}
