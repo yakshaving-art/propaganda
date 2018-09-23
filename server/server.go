@@ -52,7 +52,7 @@ func (s Server) handle(w http.ResponseWriter, r *http.Request) {
 	metrics.WebhooksBytesRead.Add(float64(len(body)))
 
 	for _, p := range s.parsers {
-		if p.Match(r.Header) {
+		if p.MatchHeaders(r.Header) {
 			a, err := p.Parse(body)
 			if err != nil {
 				http.Error(w, fmt.Sprintf("Parser failed to parse: %s", err), http.StatusUnprocessableEntity)

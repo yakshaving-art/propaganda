@@ -1,4 +1,13 @@
-package webhook
+package github
+
+import (
+	"encoding/json"
+	"fmt"
+	"github.com/sirupsen/logrus"
+	"gitlab.com/yakshaving.art/propaganda/core"
+	"regexp"
+	"strings"
+)
 
 // Headers
 // "X-Hub-Signature":[]string{"sha1=be490c94029284a1074f6ed7d6f551affcfa6e8b"},
@@ -10,33 +19,84 @@ package webhook
 // "Accept":[]string{"*/*"},
 // "Content-Type":[]string{"application/json"}
 
-// // Repository holds the repository information
-// type Repository struct {
-// 	URL      string `json:"url"`
-// 	FullName string `json:"full_name"`
-// }
+// Parser implements the core.Parser type for GitHub Pull Request
+type Parser struct {
+	matcher *regexp.Regexp
+}
 
-// // Hook holds the hook events
-// type Hook struct {
-// 	Events []string `json:"events"`
-// }
+// NewParser creates a new parser using the pattern provided
+func NewParser(pattern string) Parser {
+	re, err := regexp.Compile(pattern)
+	if err != nil {
+		logrus.Fatalf("could not compile regexp pattern for announcements: %s", err)
+	}
 
-// // HookPayload hold the GitHub
-// type HookPayload struct {
-// 	Repository Repository `json:"repository"`
-// 	Hook       Hook       `json:"hook"`
-// }
+	return Parser{
+		matcher: re,
+	}
+}
 
-// // GetRepository implements webhook.HookPayload interface
-// func (h HookPayload) GetRepository() string {
-// 	return h.Repository.FullName
-// }
+// MatchHeaders indicates that the headers match with the kind of request
+func (Parser) MatchHeaders(headers map[string][]string) bool {
+	if event, ok := headers["X-Github-Event"]; ok {
+		if len(event) != 1 {
+			return false
+		}
+		return event[0] == "pull_request"
+	}
+	return false
+}
 
-// // ParseHookPayload parses a payload string and returns the payload as a struct
-// func (c Client) ParseHookPayload(payload string) (webhooks.HookPayload, error) {
-// 	var hookPayload HookPayload
-// 	if err := json.Unmarshal([]byte(payload), &hookPayload); err != nil {
-// 		return hookPayload, fmt.Errorf("could not parse hook payload: %s", err)
-// 	}
-// 	return hookPayload, nil
-// }
+// Parse parses a payload and returns a a valid one if everything is in place for it to be announced
+func (p Parser) Parse(payload []byte) (core.Announcement, error) {
+	var pl Payload
+	if err := json.Unmarshal(payload, &pl); err != nil {
+		return pl, fmt.Errorf("could not parse json payload: %s", err)
+	}
+
+	if !p.matcher.MatchString(pl.PullRequest.Title) {
+		return pl, fmt.Errorf("MR title '%s' is not annouceable", pl.PullRequest.Title)
+	}
+
+	pl.PullRequest.Title = strings.TrimSpace(p.matcher.ReplaceAllString(pl.PullRequest.Title, ""))
+
+	return pl, nil
+}
+
+// Payload wraps a Github pull request
+type Payload struct {
+	PullRequest PullRequest `json:"pull_request"`
+	Repository  Repository  `json:"repository"`
+}
+
+// PullRequest implements a pull request payload object
+type PullRequest struct {
+	URL    string `json:"html_url"`
+	State  string `json:"state"`
+	Title  string `json:"title"`
+	Merged bool   `json:"merged"`
+	Body   string `json:"body"`
+}
+
+// ProjectName implements Annoucement
+func (pl Payload) ProjectName() string {
+	return pl.Repository.FullName
+}
+
+// ShouldAnnounce implements Annoucement
+func (pl Payload) ShouldAnnounce() bool {
+	return pl.PullRequest.Merged && pl.PullRequest.State == "closed"
+}
+
+// Text implements Annoucement
+func (pl Payload) Text() string {
+	return fmt.Sprintf("*%s*\n\n%s\n\n*URL:* %s",
+		pl.PullRequest.Title,
+		pl.PullRequest.Body,
+		pl.PullRequest.URL)
+}
+
+// Repository holds the repository information
+type Repository struct {
+	FullName string `json:"full_name"`
+}

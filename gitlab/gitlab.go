@@ -12,20 +12,35 @@ package gitlab
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"encoding/json"
 
 	"gitlab.com/yakshaving.art/propaganda/core"
+
+	"github.com/sirupsen/logrus"
 )
 
 // Parser implements the core.Parser type for GitLab merge webhooks
 type Parser struct {
-	MatchString string
+	matcher *regexp.Regexp
 }
 
-// Match indicates that the headers match with the kind of request
-func (Parser) Match(headers map[string][]string) bool {
+// NewParser creates a new parser using the pattern provided
+func NewParser(pattern string) Parser {
+	re, err := regexp.Compile(pattern)
+	if err != nil {
+		logrus.Fatalf("could not compile regexp pattern for announcements: %s", err)
+	}
+
+	return Parser{
+		matcher: re,
+	}
+}
+
+// MatchHeaders indicates that the headers match with the kind of request
+func (Parser) MatchHeaders(headers map[string][]string) bool {
 	if event, ok := headers["X-Gitlab-Event"]; ok {
 		if len(event) != 1 {
 			return false
@@ -35,7 +50,7 @@ func (Parser) Match(headers map[string][]string) bool {
 	return false
 }
 
-// Parse creates a new merge request object from the passed payload
+// Parse parses a payload and returns a a valid one if everything is in place for it to be announced
 func (p Parser) Parse(payload []byte) (core.Announcement, error) {
 	var mr MergeRequest
 	if err := json.Unmarshal(payload, &mr); err != nil {
@@ -44,10 +59,13 @@ func (p Parser) Parse(payload []byte) (core.Announcement, error) {
 	if mr.Kind != "merge_request" {
 		return MergeRequest{}, fmt.Errorf("json payload is not a merge request but a %s", mr.Kind)
 	}
-	if !strings.HasPrefix(mr.Attributes.Title, p.MatchString) {
+
+	if !p.matcher.MatchString(mr.Attributes.Title) {
 		return MergeRequest{}, fmt.Errorf("MR title '%s' is not annouceable", mr.Attributes.Title)
 	}
-	mr.Attributes.Title = strings.TrimSpace(mr.Attributes.Title[len(p.MatchString):])
+
+	mr.Attributes.Title = strings.TrimSpace(p.matcher.ReplaceAllString(mr.Attributes.Title, ""))
+
 	return mr, nil
 }
 

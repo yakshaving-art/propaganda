@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"gitlab.com/yakshaving.art/propaganda/core"
+	"gitlab.com/yakshaving.art/propaganda/github"
 	"gitlab.com/yakshaving.art/propaganda/gitlab"
 	"gitlab.com/yakshaving.art/propaganda/metrics"
 	"gitlab.com/yakshaving.art/propaganda/server"
@@ -26,9 +27,8 @@ func main() {
 			WebhookURL: args.WebhookURL,
 		},
 		[]core.Parser{
-			gitlab.Parser{
-				MatchString: "[announce]",
-			},
+			github.NewParser(args.MatchString),
+			gitlab.NewParser(args.MatchString),
 		})
 
 	logrus.Fatal(s.ListenAndServe(args.Address))
@@ -47,7 +47,8 @@ type Args struct {
 	Address     string
 	MetricsPath string
 
-	WebhookURL string
+	WebhookURL  string
+	MatchString string
 }
 
 func parseArgs() Args {
@@ -56,6 +57,7 @@ func parseArgs() Args {
 	flag.StringVar(&args.Address, "address", ":9092", "listening address")
 	flag.StringVar(&args.MetricsPath, "metrics", "/metrics", "metrics path")
 	flag.StringVar(&args.WebhookURL, "webhook-url", os.Getenv("SLACK_WEBHOOK_URL"), "slack webhook url")
+	flag.StringVar(&args.MatchString, "match-pattern", "\\[announce\\]", "match string")
 	flag.Parse()
 
 	if args.WebhookURL == "" {
