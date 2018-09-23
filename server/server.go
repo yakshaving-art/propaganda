@@ -12,8 +12,8 @@ import (
 )
 
 // New returns a new Server with the provided parsers
-func New(announcer core.Announcer, parsers []core.Parser) Server {
-	return Server{
+func New(announcer core.Announcer, parsers []core.Parser) *Server {
+	return &Server{
 		parsers:   parsers,
 		announcer: announcer,
 	}
@@ -23,15 +23,23 @@ func New(announcer core.Announcer, parsers []core.Parser) Server {
 type Server struct {
 	parsers   []core.Parser
 	announcer core.Announcer
+	server    *http.Server
 }
 
 // ListenAndServe starts listening and serving traffic
-func (s Server) ListenAndServe(addr string) error {
+func (s *Server) ListenAndServe(addr string) error {
 	http.HandleFunc("/", s.handle)
 
 	metrics.Up.Set(1)
 	logrus.Infof("listening on %s", addr)
-	return http.ListenAndServe(addr, nil)
+
+	s.server = &http.Server{Addr: addr}
+	return s.server.ListenAndServe()
+}
+
+// Shutdown closes the server so it stops listening
+func (s *Server) Shutdown() error {
+	return s.server.Close()
 }
 
 func (s Server) handle(w http.ResponseWriter, r *http.Request) {

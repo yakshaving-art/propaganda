@@ -18,7 +18,7 @@ func Load(in []byte) error {
 	c := Configuration{}
 	err := yaml.Unmarshal(in, &c)
 	if err != nil {
-		return fmt.Errorf("failed to parse configuration: %s", err)
+		return fmt.Errorf("failed to parse: %s", err)
 	}
 
 	config = c
