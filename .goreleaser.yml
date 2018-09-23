@@ -1,0 +1,63 @@
+project_name: propaganda
+release:
+  github:
+    owner: yakshaving-art
+    name: propaganda
+  name_template: '{{ .Tag }}'
+builds:
+- goos:
+  - linux
+  - darwin
+  goarch:
+    - amd64
+    - arm
+    - arm64
+  goarm:
+    - "6"
+  main: .
+  binary: propaganda
+  ldflags: -s -w -X gitlab.com/yakshaving.art/propaganda/version.Version={{.Version}} -X gitlab.com/yakshaving.art/propaganda/version.Commit={{.Commit}} -X gitlab.com/yakshaving.art/propaganda/version.Date={{.Date}}
+
+snapshot:
+  name_template: SNAPSHOT-{{ .Commit }}
+
+checksum:
+  name_template: '{{ .ProjectName }}_{{ .Version }}_checksums.txt'
+dist: dist
+changelog:
+  filters:
+    exclude:
+      - typo
+      - Fix
+      - Merge
+      - WIP
+archive:
+  name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+  format: tar.gz
+  files:
+  - license*
+  - LICENSE*
+  - readme*
+  - README*
+  - changelog*
+  - CHANGELOG*
+dockers:
+- image: yakshaving/propaganda
+  goos: linux
+  goarch: amd64
+  goarm: ''
+  binary: propaganda
+  dockerfile: Dockerfile.amd64
+- image: yakshaving/propaganda-armv6
+  goos: linux
+  goarch: arm
+  goarm: '6'
+  binary: propaganda
+  dockerfile: Dockerfile.armv6
+- image: yakshaving/propaganda-arm64
+  goos: linux
+  goarch: arm64
+  binary: propaganda
+  dockerfile: Dockerfile.arm64
+env_files:
+  github_token: ~/.goreleaser.token
