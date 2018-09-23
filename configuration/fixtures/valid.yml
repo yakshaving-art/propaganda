@@ -1,0 +1,4 @@
+---
+default_channel: "#propaganda"
+repositories:
+  pcarranza/test-webhooks: "#private_channel"
