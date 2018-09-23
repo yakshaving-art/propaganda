@@ -30,3 +30,12 @@ func Load(in []byte) error {
 func GetConfiguration() Configuration {
 	return config
 }
+
+// GetChannel returns the specific channel for the repo, or the default one if there is no specific set.
+func (c Configuration) GetChannel(repoFullName string) string {
+	channel, ok := c.Repositories[repoFullName]
+	if ok {
+		return channel
+	}
+	return c.DefaultChannel
+}

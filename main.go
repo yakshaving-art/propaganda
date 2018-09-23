@@ -49,6 +49,8 @@ type Args struct {
 
 	WebhookURL  string
 	MatchString string
+
+	ConfigFile string
 }
 
 func parseArgs() Args {
@@ -58,10 +60,15 @@ func parseArgs() Args {
 	flag.StringVar(&args.MetricsPath, "metrics", "/metrics", "metrics path")
 	flag.StringVar(&args.WebhookURL, "webhook-url", os.Getenv("SLACK_WEBHOOK_URL"), "slack webhook url")
 	flag.StringVar(&args.MatchString, "match-pattern", "\\[announce\\]", "match string")
+	flag.StringVar(&args.ConfigFile, "config", "propaganda.yml", "configuration file to use")
 	flag.Parse()
 
 	if args.WebhookURL == "" {
-		logrus.Fatalf("No slack webhook url, define it through -webhook-url argument or SLACK_WEBHOOK_URL env var")
+		logrus.Fatalf("no slack webhook url, define it through -webhook-url argument or SLACK_WEBHOOK_URL env var")
+	}
+
+	if _, err := os.Stat(args.ConfigFile); err != nil {
+		logrus.Fatalf("failed to stat configuration file %s: %s", args.ConfigFile, err)
 	}
 
 	return args

@@ -69,7 +69,9 @@ func (s Server) handle(w http.ResponseWriter, r *http.Request) {
 			metrics.WebhooksValid.WithLabelValues(a.ProjectName()).Inc()
 
 			logrus.Debugf("announcing webhook %#v", a)
-			s.announcer.Announce(a)
+			if err = s.announcer.Announce(a); err != nil {
+				http.Error(w, fmt.Sprintf("failed to announce change: %s", err), http.StatusBadGateway)
+			}
 
 			w.WriteHeader(http.StatusAccepted)
 			// logrus.Debugf("received Webhook\nHeaders: %#v\nPayload: %s", r.Header, string(body))
