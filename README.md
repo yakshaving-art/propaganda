@@ -28,3 +28,13 @@ Usage of ./propaganda:
   -webhook-url string
     	slack webhook url (default SLACK_WEBHOOK_URL env var)
 ```
+
+## Registering Webhooks
+
+### Github
+
+Be sure to pick `application/json` as content type, else all the webhooks will simply fail to be parsed.
+
+### Gitlab
+
+No particularities, simply pick only Merge Request events to reduce noise.
