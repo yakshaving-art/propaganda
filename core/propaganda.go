@@ -16,5 +16,5 @@ type Parser interface {
 
 // Announcer provides a simple interface to announce things
 type Announcer interface {
-	Announce(Announcement)
+	Announce(Announcement) error
 }

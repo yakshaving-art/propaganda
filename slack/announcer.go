@@ -3,8 +3,11 @@ package slack
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 
+	conf "gitlab.com/yakshaving.art/propaganda/configuration"
 	"gitlab.com/yakshaving.art/propaganda/core"
 	"gitlab.com/yakshaving.art/propaganda/metrics"
 
@@ -15,20 +18,20 @@ import (
 type Announcer struct {
 	WebhookURL string
 	Proxy      string
-	// Channel    string
 }
 
 // Announce implements core.Announcer interface
-func (a Announcer) Announce(announcement core.Announcement) {
-
+func (a Announcer) Announce(announcement core.Announcement) error {
 	body, err := json.Marshal(payload{
-		Markdown: true,
-		Text:     announcement.Text(),
+		Markdown:    true,
+		Text:        announcement.Text(),
+		Channel:     conf.GetConfiguration().GetChannel(announcement.ProjectName()),
+		UnfurlLinks: false,
+		UnfurlMedia: false,
 	})
 	if err != nil {
 		metrics.AnnouncementErrors.WithLabelValues("encoding").Inc()
-		logrus.Errorf("failed to encode payload as json: %s", err)
-		return
+		return fmt.Errorf("failed to encode payload as json: %s", err)
 	}
 
 	logrus.Debugf("posting payload: %s", string(body))
@@ -36,16 +39,14 @@ func (a Announcer) Announce(announcement core.Announcement) {
 	req, err := http.NewRequest(http.MethodPost, a.WebhookURL, bytes.NewReader(body))
 	if err != nil {
 		metrics.AnnouncementErrors.WithLabelValues("request").Inc()
-		logrus.Errorf("failed to create POST request: %s", err)
-		return
+		return fmt.Errorf("failed to create POST request: %s", err)
 	}
 	req.Header.Add("Content-type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
 
 	if err != nil {
 		metrics.AnnouncementErrors.WithLabelValues("unknown").Inc()
-		logrus.Errorf("failed to call slack webhook: %s", err)
-		return
+		return fmt.Errorf("failed to call slack webhook: %s", err)
 	}
 
 	switch {
@@ -54,45 +55,22 @@ func (a Announcer) Announce(announcement core.Announcement) {
 		metrics.AnnouncementSuccesses.WithLabelValues(announcement.ProjectName()).Inc()
 
 	default:
-		logrus.Debugf("payload failed to slack with response: %#v", resp)
 		metrics.AnnouncementErrors.WithLabelValues(resp.Status).Inc()
+		b, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return fmt.Errorf("failed to push payload with code %d, and also to read the response body: %s", resp.StatusCode, err)
+		}
+		defer resp.Body.Close()
+		return fmt.Errorf("failed to push payload to slack with code %d: %s", resp.StatusCode, string(b))
 	}
+	return nil
 }
 
+// Payload is the slack payload object used to send data
 type payload struct {
-	// Username string `json:"username,omitempty"`
-	Text     string `json:"text,omitempty"`
-	Markdown bool   `json:"mrkdwn,omitempty"`
-	// Parse       string       `json:"parse,omitempty"`
-	// IconUrl     string       `json:"icon_url,omitempty"`
-	// IconEmoji   string       `json:"icon_emoji,omitempty"`
-	// Channel string `json:"channel,omitempty"`
-	// LinkNames   string       `json:"link_names,omitempty"`
-	// Attachments []Attachment `json:"attachments,omitempty"`
-	// UnfurlLinks bool         `json:"unfurl_links,omitempty"`
-	// UnfurlMedia bool         `json:"unfurl_media,omitempty"`
+	Text        string `json:"text,omitempty"`
+	Markdown    bool   `json:"mrkdwn,omitempty"`
+	Channel     string `json:"channel,omitempty"`
+	UnfurlLinks bool   `json:"unfurl_links,omitempty"`
+	UnfurlMedia bool   `json:"unfurl_media,omitempty"`
 }
-
-// type Field struct {
-// 	Title string `json:"title"`
-// 	Value string `json:"value"`
-// 	Short bool   `json:"short"`
-// }
-
-// type Attachment struct {
-// 	Fallback   *string   `json:"fallback"`
-// 	Color      *string   `json:"color"`
-// 	PreText    *string   `json:"pretext"`
-// 	AuthorName *string   `json:"author_name"`
-// 	AuthorLink *string   `json:"author_link"`
-// 	AuthorIcon *string   `json:"author_icon"`
-// 	Title      *string   `json:"title"`
-// 	TitleLink  *string   `json:"title_link"`
-// 	Text       *string   `json:"text"`
-// 	ImageUrl   *string   `json:"image_url"`
-// 	Fields     []*Field  `json:"fields"`
-// 	Footer     *string   `json:"footer"`
-// 	FooterIcon *string   `json:"footer_icon"`
-// 	Timestamp  *int64    `json:"ts"`
-// 	MarkdownIn *[]string `json:"mrkdwn_in"`
-// }

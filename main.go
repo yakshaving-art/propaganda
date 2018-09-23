@@ -2,8 +2,12 @@ package main
 
 import (
 	"flag"
+	"io/ioutil"
 	"os"
+	"os/signal"
+	"syscall"
 
+	"gitlab.com/yakshaving.art/propaganda/configuration"
 	"gitlab.com/yakshaving.art/propaganda/core"
 	"gitlab.com/yakshaving.art/propaganda/github"
 	"gitlab.com/yakshaving.art/propaganda/gitlab"
@@ -31,7 +35,28 @@ func main() {
 			gitlab.NewParser(args.MatchString),
 		})
 
-	logrus.Fatal(s.ListenAndServe(args.Address))
+	go func() {
+		logrus.Fatal(s.ListenAndServe(args.Address))
+	}()
+
+	signalCh := make(chan os.Signal, 1)
+	signal.Notify(signalCh, syscall.SIGHUP, syscall.SIGINT, syscall.SIGUSR1, syscall.SIGUSR2)
+
+	for sig := range signalCh {
+		switch sig {
+		case syscall.SIGHUP:
+			logrus.Info("Reloading the configuration")
+			loadConfiguration(args)
+
+		case syscall.SIGUSR1:
+			toggleLogLevel()
+
+		case syscall.SIGINT:
+			logrus.Info("Shutting down gracefully")
+			s.Shutdown()
+			os.Exit(0)
+		}
+	}
 }
 
 func setupLogger() {
@@ -39,7 +64,17 @@ func setupLogger() {
 	logrus.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp: true,
 	})
-	logrus.SetLevel(logrus.DebugLevel)
+}
+
+func toggleLogLevel() {
+	switch logrus.GetLevel() {
+	case logrus.DebugLevel:
+		logrus.Infof("setting info log level")
+		logrus.SetLevel(logrus.InfoLevel)
+	default:
+		logrus.Infof("settings debug log level")
+		logrus.SetLevel(logrus.DebugLevel)
+	}
 }
 
 // Args represents the commandline arguments
@@ -49,6 +84,9 @@ type Args struct {
 
 	WebhookURL  string
 	MatchString string
+
+	ConfigFile string
+	Debug      bool
 }
 
 func parseArgs() Args {
@@ -58,11 +96,30 @@ func parseArgs() Args {
 	flag.StringVar(&args.MetricsPath, "metrics", "/metrics", "metrics path")
 	flag.StringVar(&args.WebhookURL, "webhook-url", os.Getenv("SLACK_WEBHOOK_URL"), "slack webhook url")
 	flag.StringVar(&args.MatchString, "match-pattern", "\\[announce\\]", "match string")
+	flag.StringVar(&args.ConfigFile, "config", "propaganda.yml", "configuration file to use")
+	flag.BoolVar(&args.Debug, "debug", false, "enable debug logging")
 	flag.Parse()
 
-	if args.WebhookURL == "" {
-		logrus.Fatalf("No slack webhook url, define it through -webhook-url argument or SLACK_WEBHOOK_URL env var")
+	if args.Debug {
+		toggleLogLevel()
 	}
 
+	if args.WebhookURL == "" {
+		logrus.Fatalf("no slack webhook url, define it through -webhook-url argument or SLACK_WEBHOOK_URL env var")
+	}
+
+	loadConfiguration(args)
+
 	return args
+}
+
+func loadConfiguration(args Args) {
+	content, err := ioutil.ReadFile(args.ConfigFile)
+	if err != nil {
+		logrus.Errorf("failed to read configuration file %s: %s", args.ConfigFile, err)
+	}
+
+	if err = configuration.Load(content); err != nil {
+		logrus.Errorf("failed to load configuration file %s: %s", args.ConfigFile, err)
+	}
 }
