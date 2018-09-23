@@ -14,6 +14,7 @@ import (
 	"gitlab.com/yakshaving.art/propaganda/metrics"
 	"gitlab.com/yakshaving.art/propaganda/server"
 	"gitlab.com/yakshaving.art/propaganda/slack"
+	"gitlab.com/yakshaving.art/propaganda/version"
 
 	"github.com/onrik/logrus/filename"
 	"github.com/sirupsen/logrus"
@@ -85,8 +86,9 @@ type Args struct {
 	WebhookURL  string
 	MatchString string
 
-	ConfigFile string
-	Debug      bool
+	ConfigFile  string
+	Debug       bool
+	ShowVersion bool
 }
 
 func parseArgs() Args {
@@ -98,7 +100,13 @@ func parseArgs() Args {
 	flag.StringVar(&args.MatchString, "match-pattern", "\\[announce\\]", "match string")
 	flag.StringVar(&args.ConfigFile, "config", "propaganda.yml", "configuration file to use")
 	flag.BoolVar(&args.Debug, "debug", false, "enable debug logging")
+	flag.BoolVar(&args.ShowVersion, "version", false, "show version and exit")
 	flag.Parse()
+
+	if args.ShowVersion {
+		logrus.Printf("Version: %s Commit: %s Date: %s", version.Version, version.Commit, version.Date)
+		os.Exit(0)
+	}
 
 	if args.Debug {
 		toggleLogLevel()

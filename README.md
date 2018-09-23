@@ -20,6 +20,8 @@ Usage of ./propaganda:
     	match string regex (default "\\[announce\\]")
   -metrics string
     	metrics path (default "/metrics")
+  -version
+    	show version and exit
   -webhook-url string
     	slack webhook url (default SLACK_WEBHOOK_URL env var)
 ```
