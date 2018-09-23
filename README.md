@@ -1,3 +1,6 @@
+[![pipeline status](https://gitlab.com/yakshaving.art/propaganda/badges/master/pipeline.svg)](https://gitlab.com/yakshaving.art/propaganda/commits/master)
+[![coverage report](https://gitlab.com/yakshaving.art/propaganda/badges/master/coverage.svg)](https://gitlab.com/yakshaving.art/propaganda/commits/master)
+
 # Propaganda
 
 Announces merges in GitHub and GitLab to a slack incoming webhook.
