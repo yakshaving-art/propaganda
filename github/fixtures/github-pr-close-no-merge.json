@@ -12,7 +12,7 @@
         "number": 2,
         "state": "closed",
         "locked": false,
-        "title": "Second test",
+        "title": "[announce] Second test",
         "user": {
             "login": "pcarranza",
             "id": 4496338,
@@ -33,7 +33,7 @@
             "type": "User",
             "site_admin": false
         },
-        "body": "",
+        "body": "some other payload message that comes from the description",
         "created_at": "2018-09-18T22:02:53Z",
         "updated_at": "2018-09-18T22:03:05Z",
         "closed_at": "2018-09-18T22:03:05Z",

@@ -9,9 +9,7 @@ import (
 )
 
 func TestParsingPayloads(t *testing.T) {
-	parser := gitlab.Parser{
-		MatchString: "[announce]",
-	}
+	parser := gitlab.NewParser("\\[announce\\]")
 	tt := []struct {
 		name           string
 		jsonFilename   string

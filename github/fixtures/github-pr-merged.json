@@ -12,7 +12,7 @@
         "number": 1,
         "state": "closed",
         "locked": false,
-        "title": "Just write something",
+        "title": "[announce] Just write something",
         "user": {
             "login": "pcarranza",
             "id": 4496338,
@@ -33,7 +33,7 @@
             "type": "User",
             "site_admin": false
         },
-        "body": "",
+        "body": "some payload message that comes from the description",
         "created_at": "2018-09-18T21:59:43Z",
         "updated_at": "2018-09-18T22:00:59Z",
         "closed_at": "2018-09-18T22:00:59Z",
