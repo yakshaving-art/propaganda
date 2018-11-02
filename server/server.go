@@ -61,7 +61,7 @@ func (s Server) handle(w http.ResponseWriter, r *http.Request) {
 
 	for _, p := range s.parsers {
 		if p.MatchHeaders(r.Header) {
-			a, err := p.Parse(body)
+			a, err := p.Parse(r.Header, body)
 			if err != nil {
 				http.Error(w, fmt.Sprintf("Parser failed to parse: %s", err), http.StatusUnprocessableEntity)
 				metrics.WebhooksInvalid.WithLabelValues("failed_parsing").Inc()

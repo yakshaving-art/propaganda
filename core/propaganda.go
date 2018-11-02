@@ -11,7 +11,7 @@ type Announcement interface {
 // parsed, and then will extract the announcement if there is any.
 type Parser interface {
 	MatchHeaders(map[string][]string) bool
-	Parse([]byte) (Announcement, error)
+	Parse(map[string][]string, []byte) (Announcement, error)
 }
 
 // Announcer provides a simple interface to announce things

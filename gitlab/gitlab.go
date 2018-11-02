@@ -25,17 +25,22 @@ import (
 // Parser implements the core.Parser type for GitLab merge webhooks
 type Parser struct {
 	matcher *regexp.Regexp
+	token   string
 }
 
 // NewParser creates a new parser using the pattern provided
-func NewParser(pattern string) Parser {
+func NewParser(pattern string, secretToken string) Parser {
 	re, err := regexp.Compile(pattern)
 	if err != nil {
 		logrus.Fatalf("could not compile regexp pattern for announcements: %s", err)
 	}
+	if secretToken == "" {
+		logrus.Fatalf("GITLAB_TOKEN is required to enable gitlab webhook handling")
+	}
 
 	return Parser{
 		matcher: re,
+		token:   secretToken,
 	}
 }
 
@@ -51,13 +56,25 @@ func (Parser) MatchHeaders(headers map[string][]string) bool {
 }
 
 // Parse parses a payload and returns a a valid one if everything is in place for it to be announced
-func (p Parser) Parse(payload []byte) (core.Announcement, error) {
+func (p Parser) Parse(headers map[string][]string, payload []byte) (core.Announcement, error) {
 	var mr MergeRequest
 	if err := json.Unmarshal(payload, &mr); err != nil {
 		return mr, fmt.Errorf("could not parse json payload: %s", err)
 	}
 	if mr.Kind != "merge_request" {
 		return MergeRequest{}, fmt.Errorf("json payload is not a merge request but a %s", mr.Kind)
+	}
+
+	var signatures []string
+	var ok bool
+	if signatures, ok = headers["X-Gitlab-Token"]; !ok {
+		return mr, fmt.Errorf("missing token in payload: %s", mr.Attributes.Title)
+	} else if len(signatures) != 1 {
+		return mr, fmt.Errorf("missing token in payload: %s", mr.Attributes.Title)
+	}
+
+	if signatures[0] != p.token {
+		return mr, fmt.Errorf("invalid token in payload: %s", signatures[1])
 	}
 
 	if !p.matcher.MatchString(mr.Attributes.Title) {
