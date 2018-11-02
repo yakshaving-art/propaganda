@@ -1,22 +1,37 @@
-image: golang:1.10
+image: registry.gitlab.com/yakshaving.art/go-builder:0.0.2
 stages:
-  - test
   - build
-
-before_script:
-  - go get -u github.com/golang/dep/cmd/dep
-  - mkdir -p /go/src/gitlab.com/yakshaving.art
-  - cp -r /builds/yakshaving.art/propaganda /go/src/gitlab.com/yakshaving.art/
-  - cd /go/src/gitlab.com/yakshaving.art/propaganda
-
-test:
-  stage: test
-  coverage: '/^total:\s+\(statements\)\s+(\d+.\d+)%$/'
-  script:
-  - make test
+  - release
 
 build:
   stage: build
+  coverage: '/^total:\s+\(statements\)\s+(\d+.\d+)%$/'
+  artifacts:
+    paths:
+    - propaganda
   script:
-  - make build
-    
+  - mkdir -p /go/src/gitlab.com/${CI_PROJECT_NAMESPACE}
+  - cd /go/src/gitlab.com/${CI_PROJECT_NAMESPACE}
+  - ln -s ${CI_PROJECT_DIR}
+  - cd /go/src/gitlab.com/${CI_PROJECT_PATH}
+  - make test build
+
+release:
+  stage: release
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.amd64 --destination $CI_REGISTRY_IMAGE:latest
+
+release_tag:
+  stage: release
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.amd64 --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+  only:
+  - tags
