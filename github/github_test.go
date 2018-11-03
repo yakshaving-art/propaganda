@@ -9,15 +9,17 @@ import (
 )
 
 func TestParsingPayloads(t *testing.T) {
-	parser := github.NewParser("\\[announce\\]")
+	parser := github.NewParser("\\[announce\\]", "3s28DdQ7gZ23Px")
 	tt := []struct {
 		name           string
+		signature      string
 		jsonFilename   string
 		expected       github.Payload
 		shouldAnnounce bool
 	}{
 		{
 			"MR Create",
+			"332614cde50f9c740a5d6f9438fbcc5d4f06b7ae",
 			"fixtures/github-pr-create.json",
 			github.Payload{
 				PullRequest: github.PullRequest{
@@ -35,6 +37,7 @@ func TestParsingPayloads(t *testing.T) {
 		},
 		{
 			"MR Merged",
+			"dd1393980765e4a96d0a1056a7663135694e2ccc",
 			"fixtures/github-pr-merged.json",
 			github.Payload{
 				PullRequest: github.PullRequest{
@@ -52,6 +55,7 @@ func TestParsingPayloads(t *testing.T) {
 		},
 		{
 			"MR Closed without a merge",
+			"5d1be16bb571bfb419a588f72d12ab2ae3c1c2b7",
 			"fixtures/github-pr-close-no-merge.json",
 			github.Payload{
 				PullRequest: github.PullRequest{
@@ -76,7 +80,9 @@ func TestParsingPayloads(t *testing.T) {
 			a.Nilf(err, "could not read fixture file %s", tc.jsonFilename)
 			a.NotNilf(b, "content should not be nil")
 
-			mr, err := parser.Parse(b)
+			mr, err := parser.Parse(map[string][]string{
+				"X-Hub-Signature": {"sha1=" + tc.signature},
+			}, b)
 			a.NoErrorf(err, "could not unmarshal PR json")
 
 			a.EqualValuesf(tc.expected, mr, "parsed merge request is not as expected")
@@ -90,7 +96,7 @@ func TestParsingPayloads(t *testing.T) {
 
 func TestHeadersMatcher(t *testing.T) {
 	a := assert.New(t)
-	p := github.NewParser(".*")
+	p := github.NewParser(".*", "3s28DdQ7gZ23Px")
 
 	a.Equal(false, p.MatchHeaders(map[string][]string{}))
 	a.Equal(false, p.MatchHeaders(map[string][]string{"X-Gitlab-Event": {"pull_request"}}))
