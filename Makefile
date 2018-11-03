@@ -16,4 +16,4 @@ test: ensure
 
 .PHONY: build
 build: ensure
-	@GOOS=linux GOARCH=amd64 go build -ldflags "-X gitlab.com/yakshaving.art/propaganda/version.Version=$(VERSION) -X gitlab.com/yakshaving.art/propaganda/version.Commit=$(COMMIT_ID) -X gitlab.com/yakshaving.art/propaganda/version.Date=$(COMMIT_DATE)"
+	@GOOS=linux GOARCH=amd64 go build -ldflags "-s -w -X gitlab.com/yakshaving.art/propaganda/version.Version=$(VERSION) -X gitlab.com/yakshaving.art/propaganda/version.Commit=$(COMMIT_ID) -X gitlab.com/yakshaving.art/propaganda/version.Date=$(COMMIT_DATE)"
