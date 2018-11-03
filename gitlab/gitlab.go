@@ -74,8 +74,9 @@ func (p Parser) Parse(headers map[string][]string, payload []byte) (core.Announc
 	}
 
 	if signatures[0] != p.token {
-		return mr, fmt.Errorf("invalid token in payload: %s", signatures[1])
+		return mr, fmt.Errorf("Invalid token in payload: %s", signatures[1])
 	}
+	logrus.Debugf("Signature token is as expected, continuing")
 
 	if !p.matcher.MatchString(mr.Attributes.Title) {
 		return MergeRequest{}, fmt.Errorf("MR title '%s' is not annouceable", mr.Attributes.Title)

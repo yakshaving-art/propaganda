@@ -97,7 +97,11 @@ func (p Parser) validSignature(signature string, body []byte) bool {
 
 	isEqual := hmac.Equal(signedBody, actual)
 
-	logrus.Debugf("Signed actual signature %s, body %s, equal: %t", hex.EncodeToString(actual), hex.EncodeToString(signedBody), isEqual)
+	if isEqual {
+		logrus.Debugf("Passed signature for the body is as expected %s", hex.EncodeToString(actual))
+	} else {
+		logrus.Infof("Passed signature does not match the calculation")
+	}
 
 	return isEqual
 }
