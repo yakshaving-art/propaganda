@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/signal"
@@ -113,6 +114,15 @@ func parseArgs() Args {
 	flag.BoolVar(&args.ShowVersion, "version", false, "show version and exit")
 	flag.BoolVar(&args.EnableGithub, "enable-github", false, "enable github webhook handling")
 	flag.BoolVar(&args.EnableGitlab, "enable-gitlab", false, "enable gitlab webhook handling")
+
+	flag.Usage = func() {
+		fmt.Printf("Usage of %s:\n", os.Args[0])
+		flag.PrintDefaults()
+		fmt.Println("\nEnvironment variables")
+		fmt.Println("  SLACK_WEBHOOK_URL slack webhook url used to post to slack, required")
+		fmt.Println("  GITLAB_TOKEN token used to validate the payload sent from the gitlab instance, required when gitlab is enabled")
+		fmt.Println("  GITHUB_TOKEN token used to validate the payload signature sent from github, required when github is enabled")
+	}
 
 	flag.Parse()
 
