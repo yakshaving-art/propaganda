@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"gitlab.com/yakshaving.art/propaganda/configuration"
 	"gitlab.com/yakshaving.art/propaganda/core"
@@ -159,6 +160,10 @@ func loadConfiguration(args Args) {
 	}
 
 	if err = configuration.Load(content); err != nil {
-		logrus.Errorf("failed to load configuration file %s: %s", args.ConfigFile, err)
+		logrus.Errorf("failed to reload configuration file %s: %s", args.ConfigFile, err)
+		metrics.LastConfigReloadSuccessfull.Set(0)
+		return
 	}
+	metrics.LastConfigReloadTime.Set(float64(time.Now().Unix()))
+	metrics.LastConfigReloadSuccessfull.Set(1)
 }
