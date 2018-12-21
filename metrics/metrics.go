@@ -63,6 +63,16 @@ var (
 		Name:      "errors_total",
 		Help:      "total number of announcement errors",
 	}, []string{"status"})
+	LastConfigReloadTime = prometheus.NewGauge(prometheus.GaugeOpts{
+		Namespace: namespace,
+		Name:      "last_config_reload_time_seconds",
+		Help:      "unix timestamp of when the configuration was last reloaded",
+	})
+	LastConfigReloadSuccessfull = prometheus.NewGauge(prometheus.GaugeOpts{
+		Namespace: namespace,
+		Name:      "last_config_reload_successful",
+		Help:      "wether or not the last configuration reload was successful",
+	})
 )
 
 // Register registers all the metrics and sets the http handler
@@ -79,6 +89,8 @@ func Register(metricsPath string) {
 	prometheus.MustRegister(WebhooksValid)
 	prometheus.MustRegister(AnnouncementSuccesses)
 	prometheus.MustRegister(AnnouncementErrors)
+	prometheus.MustRegister(LastConfigReloadTime)
+	prometheus.MustRegister(LastConfigReloadSuccessfull)
 
 	http.Handle(metricsPath, prometheus.Handler())
 }
