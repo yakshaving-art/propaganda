@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 
 	conf "gitlab.com/yakshaving.art/propaganda/configuration"
 	"gitlab.com/yakshaving.art/propaganda/core"
@@ -20,11 +21,14 @@ type Announcer struct {
 	Proxy      string
 }
 
+// transforms markdown links to slack links
+var re = regexp.MustCompile("\\[(.*?)\\]\\((.*?)\\)")
+
 // Announce implements core.Announcer interface
 func (a Announcer) Announce(announcement core.Announcement) error {
 	body, err := json.Marshal(payload{
 		Markdown:    true,
-		Text:        announcement.Text(),
+		Text:        re.ReplaceAllString(announcement.Text(), "<$2|$1>"),
 		Channel:     conf.GetConfiguration().GetChannel(announcement.ProjectName()),
 		UnfurlLinks: false,
 		UnfurlMedia: false,
