@@ -33,7 +33,13 @@ func TestSlackAnnouncerCanSucceed(t *testing.T) {
 	configuration.Load([]byte("default_channel: general"))
 
 	a := announcement{
-		text:    "test [text](http://endpoint)",
+		text: `test [text](http://endpoint)
+[one](https://secondlink.md) [link](./thirdlink.md)
+[]()
+[](#anchor)
+[no link]()
+[link](http://something/])
+[test/><javascript alert("test";) /><!----](blah)`,
 		project: "some/project",
 	}
 	ass := assert.New(t)
@@ -43,7 +49,11 @@ func TestSlackAnnouncerCanSucceed(t *testing.T) {
 		ass.NoError(err)
 		defer r.Body.Close()
 
-		if !ass.JSONEq(`{"channel":"general", "text":"test <http://endpoint|text>", "mrkdwn":true}`, string(b)) {
+		if !ass.JSONEq(`{"channel":"general", 
+		"text":"test [text](http://endpoint)\n[one](https://secondlink.md) [link](./thirdlink.md)\n[]()\n[](#anchor)\n[no link]()\n[link](http://something/])\n[test/><javascript alert(\"test\";) /><!----](blah)",
+		"mrkdwn":true
+		}`,
+			string(b)) {
 			w.WriteHeader(400)
 		} else {
 			w.WriteHeader(200)

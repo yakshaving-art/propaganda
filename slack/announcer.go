@@ -22,7 +22,7 @@ type Announcer struct {
 }
 
 // transforms markdown links to slack links
-var re = regexp.MustCompile("\\[(.*?)\\]\\((.*?)\\)")
+var re = regexp.MustCompile("\\[([^\\]])\\]\\(([^\\)]+)\\)")
 
 // Announce implements core.Announcer interface
 func (a Announcer) Announce(announcement core.Announcement) error {
