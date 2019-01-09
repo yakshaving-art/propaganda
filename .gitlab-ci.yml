@@ -16,22 +16,35 @@ build:
   - cd /go/src/gitlab.com/${CI_PROJECT_PATH}
   - make test build
 
+variables:
+  CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_DRIVER: overlay2
+
 release:
   stage: release
-  image:
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [""]
+  image: docker:stable
+  services:
+    - docker:dind
   script:
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.amd64 --destination $CI_REGISTRY_IMAGE:latest
+    - echo $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin registry.gitlab.com
+    - ln -s Dockerfile.amd64 Dockerfile
+    - docker build --cache-from $CONTAINER_IMAGE:latest \
+      --tag $CONTAINER_IMAGE:$CI_COMMIT_SHA \
+      --tag $CONTAINER_IMAGE:latest .
+    - docker push $CONTAINER_IMAGE:$CI_COMMIT_SHA
+    - docker push $CONTAINER_IMAGE:latest
 
 release_tag:
   stage: release
-  image:
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: [""]
+  image: docker:stable
+  services:
+    - docker:dind
   script:
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.amd64 --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+    - echo $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin registry.gitlab.com
+    - ln -s Dockerfile.amd64 Dockerfile
+    - docker build --cache-from $CONTAINER_IMAGE:latest \
+      --tag $CONTAINER_IMAGE:$CI_COMMIT_TAG
+    - docker push $CONTAINER_IMAGE:$CI_COMMIT_TAG
   only:
   - tags
