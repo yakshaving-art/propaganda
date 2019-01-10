@@ -54,7 +54,7 @@ release:
   - master
 
 release_tag:
-  <<: *build-docker
+  <<: *build-image
   script:
     - docker build --cache-from ${CONTAINER_IMAGE}:latest
       --tag ${CONTAINER_IMAGE}:${CI_COMMIT_TAG}
