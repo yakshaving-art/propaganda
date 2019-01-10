@@ -20,14 +20,13 @@ build:
   - make test build
 
 .build-image: &build-image
-  stage: release
+  image: docker:stable
+  services:
+    - docker:dind
   variables:
     CONTAINER_IMAGE: registry.gitlab.com/$CI_PROJECT_PATH
     DOCKER_HOST: tcp://docker:2375
     DOCKER_DRIVER: overlay2
-  image: docker:stable
-  services:
-    - docker:dind
   before_script:
     - echo $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin registry.gitlab.com
     - ln -s Dockerfile.amd64 Dockerfile
@@ -35,6 +34,7 @@ build:
     - docker logout
 
 build:
+  stage: release
   <<: *build-image
   script:
     - docker build --cache-from ${CONTAINER_IMAGE}:latest
@@ -44,6 +44,7 @@ build:
   - master
 
 release:
+  stage: release
   <<: *build-image
   script:
     - docker build --cache-from ${CONTAINER_IMAGE}:latest
@@ -54,6 +55,7 @@ release:
   - master
 
 release_tag:
+  stage: release
   <<: *build-image
   script:
     - docker build --cache-from ${CONTAINER_IMAGE}:latest
