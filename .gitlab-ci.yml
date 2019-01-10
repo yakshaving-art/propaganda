@@ -3,7 +3,7 @@ stages:
   - build
   - release
 
-build:
+build-binary:
   stage: build
   coverage: '/^total:\s+\(statements\)\s+(\d+.\d+)%$/'
   cache:
@@ -21,6 +21,7 @@ build:
 
 .build-image: &build-image
   image: docker:stable
+  stage: release
   services:
     - docker:dind
   variables:
@@ -33,8 +34,7 @@ build:
   after_script:
     - docker logout
 
-build:
-  stage: release
+build-docker:
   <<: *build-image
   script:
     - docker build --cache-from ${CONTAINER_IMAGE}:latest
@@ -44,7 +44,6 @@ build:
   - master
 
 release:
-  stage: release
   <<: *build-image
   script:
     - docker build --cache-from ${CONTAINER_IMAGE}:latest
@@ -55,7 +54,6 @@ release:
   - master
 
 release_tag:
-  stage: release
   <<: *build-image
   script:
     - docker build --cache-from ${CONTAINER_IMAGE}:latest
