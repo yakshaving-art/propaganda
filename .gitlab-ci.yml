@@ -3,7 +3,7 @@ stages:
   - build
   - release
 
-build-binary:
+build-binary: 
   stage: build
   coverage: '/^total:\s+\(statements\)\s+(\d+.\d+)%$/'
   cache:
@@ -13,11 +13,8 @@ build-binary:
     paths:
     - propaganda
   script:
-  - mkdir -p /go/src/gitlab.com/${CI_PROJECT_NAMESPACE}
-  - cd /go/src/gitlab.com/${CI_PROJECT_NAMESPACE}
-  - ln -s ${CI_PROJECT_DIR}
-  - cd /go/src/gitlab.com/${CI_PROJECT_PATH}
-  - make test build
+    - go mod download
+    - make test build
 
 .build-image: &build-image
   image: docker:stable
