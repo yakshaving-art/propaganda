@@ -13,7 +13,6 @@ build-binary:
     paths:
     - propaganda
   script:
-    - go mod download
     - make test build
 
 .build-image: &build-image
