@@ -1,6 +1,8 @@
 package slack_test
 
 import (
+	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -34,12 +36,12 @@ func TestSlackAnnouncerCanSucceed(t *testing.T) {
 
 	a := announcement{
 		text: `test [text](http://endpoint)
-[one](https://secondlink.md) [link](./thirdlink.md)
-[]()
-[](#anchor)
-[no link]()
-[link](http://something/])
-[test/><javascript alert("test";) /><!----](blah)`,
+		[one](https://secondlink.md) [link](./thirdlink.md)
+		[]()
+		[](#anchor)
+		[no link]()
+		[link](http://something/])
+		[test/><javascript alert("test";) /><!----](blah)`,
 		project: "some/project",
 	}
 	ass := assert.New(t)
@@ -49,16 +51,22 @@ func TestSlackAnnouncerCanSucceed(t *testing.T) {
 		ass.NoError(err)
 		defer r.Body.Close()
 
-		if !ass.JSONEq(`{"channel":"general", 
-		"text":"test [text](http://endpoint)\n[one](https://secondlink.md) [link](./thirdlink.md)\n[]()\n[](#anchor)\n[no link]()\n[link](http://something/])\n[test/><javascript alert(\"test\";) /><!----](blah)",
-		"mrkdwn":true
-		}`,
-			string(b)) {
-			w.WriteHeader(400)
-		} else {
-			w.WriteHeader(200)
+		data := make(map[string]interface{}, 0)
+		if err = json.Unmarshal(b, &data); err != nil {
+			http.Error(w, err.Error(), 500)
 		}
-
+		if ass.Equal(`test <http://endpoint|text>
+		<https://secondlink.md|one> <./thirdlink.md|link>
+		[]()
+		[](#anchor)
+		[no link]()
+		<http://something/]|link>
+		<blah|test/><javascript alert("test";) /><!---->`,
+			data["text"]) {
+			w.WriteHeader(200)
+		} else {
+			http.Error(w, fmt.Sprintf("text is not as expected: %s", data["text"]), 400)
+		}
 	}))
 	defer s.Close()
 
