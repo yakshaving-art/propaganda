@@ -36,6 +36,7 @@ func TestSlackAnnouncerCanSucceed(t *testing.T) {
 
 	a := announcement{
 		text: `test [text](http://endpoint)
+		<@UBLABLA123>
 		[one](https://secondlink.md) [link](./thirdlink.md)
 		[]()
 		[](#anchor)
@@ -56,6 +57,7 @@ func TestSlackAnnouncerCanSucceed(t *testing.T) {
 			http.Error(w, err.Error(), 500)
 		}
 		if ass.Equal(`test <http://endpoint|text>
+		<@UBLABLA123>
 		<https://secondlink.md|one> <./thirdlink.md|link>
 		[]()
 		[](#anchor)
